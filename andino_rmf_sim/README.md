@@ -3,7 +3,7 @@ This package contains high-level launch files to launch the entire system with A
 
 This package launches the following ...
 - RMF tools *(common.launch.py)*
-- Simulation with spawned robot fleet
+- Simulation with spawned robot fleet with Nav2-enabled controllers or custom controllers
 - Fleet manager
 - Fleet adapter
 
