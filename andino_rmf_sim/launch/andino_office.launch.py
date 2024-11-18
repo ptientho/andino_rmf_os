@@ -55,6 +55,7 @@ def generate_launch_description():
             os.path.join(get_package_share_directory('andino_fleet'), 'launch'),
             '/andino_fleet_manager.launch.py'
         ]),
+        launch_arguments=[('nav2', nav2_enabled)]
     )
 
     fleet_adapter = IncludeLaunchDescription(
@@ -69,7 +70,7 @@ def generate_launch_description():
     #ld.add_action(common_launch)
     ld.add_action(sim_launch)
     ld.add_action(sim_nav2_launch)
-    #ld.add_action(fleet_manager)
+    ld.add_action(fleet_manager)
     #ld.add_action(fleet_adapter)
     
     return ld
