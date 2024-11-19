@@ -18,6 +18,8 @@ from controller_action_msg.action import AndinoController
 from controller_action_msg.msg import RobotPose
 
 from nav2_msgs.action import NavigateToPose
+from action_msgs.msg import GoalStatus
+
 
 from geometry_msgs.msg import Quaternion, PoseWithCovarianceStamped
 
@@ -290,9 +292,13 @@ class AndinoFleetManager(Node):
 
    def _get_result_callback(self, robot_name: str, future: Future):
        result = future.result().result
+       
        if self._nav2_enabled:
            # result from nav2 controller
-           self._navigation_results[robot_name] = result.result
+           if self._goal_handles[robot_name].status == GoalStatus.STATUS_CANCELED:
+               self._navigation_results[robot_name] = False
+           else:
+               self._navigation_results[robot_name] = True         
            self._distance_remainings[robot_name] = 0.0
            self.get_logger().info('Result: {0}'.format(result.result))
        else:
@@ -306,7 +312,7 @@ class AndinoFleetManager(Node):
             feedback = feedback_msg.feedback
             # get feedback and save it in class variables
             if self._nav2_enabled:
-                self._max_lin_velocity = 0.0 # by-pass value
+                self._max_lin_velocity = 0.4 # by-pass value
                 self._distance_remainings[robot_name] = feedback.distance_remaining
             else:
                 self._max_lin_velocity = feedback.max_lin_vel.linear.x

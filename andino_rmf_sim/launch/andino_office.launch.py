@@ -16,8 +16,8 @@ from launch.conditions import IfCondition, UnlessCondition
 def generate_launch_description():
 
     # Declare launch configuration
-    nav2_enabled = LaunchConfiguration('nav2')
-    nav2_arg = DeclareLaunchArgument('nav2', default_value='false', description='If yes, use nav2 controllers.')
+    # nav2_enabled = LaunchConfiguration('nav2')
+    # nav2_arg = DeclareLaunchArgument('nav2', default_value='false', description='If yes, use nav2 controllers.')
     
     # Include Common launch
     common_launch = IncludeLaunchDescription(
@@ -33,30 +33,30 @@ def generate_launch_description():
     )
     
     # Include Spawn multiple robot launch
-    sim_launch = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource([
-            os.path.join(get_package_share_directory('andino_fleet'), 'launch'),
-            '/spawn_multiple_robot.launch.py'
-        ]),
-        condition=UnlessCondition(nav2_enabled),
-    )
+    # sim_launch = IncludeLaunchDescription(
+    #     PythonLaunchDescriptionSource([
+    #         os.path.join(get_package_share_directory('andino_fleet'), 'launch'),
+    #         '/spawn_multiple_robot.launch.py'
+    #     ]),
+    #     condition=UnlessCondition(nav2_enabled),
+    # )
     
     # Include Spawn multiple robot with nav2 launch
-    sim_nav2_launch = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource([
-            os.path.join(get_package_share_directory('andino_fleet'), 'launch'),
-            '/spawn_multiple_robot_nav2.launch.py'
-        ]),
-        condition=IfCondition(nav2_enabled),
-    )
+    # sim_nav2_launch = IncludeLaunchDescription(
+    #     PythonLaunchDescriptionSource([
+    #         os.path.join(get_package_share_directory('andino_fleet'), 'launch'),
+    #         '/spawn_multiple_robot_nav2.launch.py'
+    #     ]),
+    #     condition=IfCondition(nav2_enabled),
+    # )
 
-    fleet_manager = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource([
-            os.path.join(get_package_share_directory('andino_fleet'), 'launch'),
-            '/andino_fleet_manager.launch.py'
-        ]),
-        launch_arguments=[('nav2', nav2_enabled)]
-    )
+    # fleet_manager = IncludeLaunchDescription(
+    #     PythonLaunchDescriptionSource([
+    #         os.path.join(get_package_share_directory('andino_fleet'), 'launch'),
+    #         '/andino_fleet_manager.launch.py'
+    #     ]),
+    #     launch_arguments=[('nav2', nav2_enabled)]
+    # )
 
     fleet_adapter = IncludeLaunchDescription(
         PythonLaunchDescriptionSource([
@@ -66,11 +66,8 @@ def generate_launch_description():
     )
     
     ld = LaunchDescription()
-    ld.add_action(nav2_arg)
-    #ld.add_action(common_launch)
-    ld.add_action(sim_launch)
-    ld.add_action(sim_nav2_launch)
-    ld.add_action(fleet_manager)
-    #ld.add_action(fleet_adapter)
+    ld.add_action(common_launch)
+    ld.add_action(fleet_adapter)
+    
     
     return ld
