@@ -7,7 +7,7 @@ from launch.actions import DeclareLaunchArgument
 def generate_launch_description():
 
     nav2 = LaunchConfiguration('nav2')
-    nav2_arg = DeclareLaunchArgument('nav2', default_value='false', description='Enable Nav2 Controller')
+    nav2_arg = DeclareLaunchArgument('nav2', default_value='False', description='Enable Nav2 Controller')
     
     fleet_manager = Node(
         package= 'andino_fleet',

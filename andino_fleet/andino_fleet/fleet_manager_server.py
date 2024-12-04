@@ -12,17 +12,14 @@ from rclpy.action import ActionClient
 from rclpy.task import Future
 
 
-from andino_fleet_msg.srv import RobotControl, SendGoal, CancelGoal, RemoveAllGoals, RequestRobotPosition
+from andino_fleet_msg.srv import RobotControl, SendGoal, CancelGoal, RemoveAllGoals, RequestRobotPosition, InitPose
 
 from controller_action_msg.action import AndinoController
 from controller_action_msg.msg import RobotPose
 
-from nav2_msgs.action import NavigateToPose
 from action_msgs.msg import GoalStatus
-
-
 from geometry_msgs.msg import Quaternion, PoseWithCovarianceStamped
-
+from nav2_msgs.action import NavigateToPose
 
 from collections import deque
 from tf_transformations import quaternion_from_euler, euler_from_quaternion
@@ -60,7 +57,7 @@ class AndinoFleetManager(Node):
        # current pose
        self._current_poses = dict() # self._current_poses[robot1] -> [x1, y1, yaw1]
        # max linear velocity
-       self._max_lin_velocity = 0.0
+       self._max_lin_velocity = 0.001
        # distance remaining
        self._distance_remainings = dict() # self._distance_remainings[robot1] -> curr_dist1
        # navigation result
@@ -69,7 +66,12 @@ class AndinoFleetManager(Node):
        # logging
        self._lock = threading.Lock()
        # get parameter
-       self._nav2_enabled = self.get_parameter('nav2')
+       self._nav2_enabled = self.get_parameter('nav2').get_parameter_value().bool_value
+       # instantiate init_pose server and init_pose publishers if nav2 enabled
+       if self._nav2_enabled:
+           self._init_pose_srv = self.create_service(InitPose, 'initial_pose_server', self._init_pose_callback, callback_group=self._group1)
+           self._initialpose_pubs = dict()
+       
        if self._nav2_enabled:
            self.get_logger().info('Andino Fleet Manager Started with Nav2 Controller')
        else:
@@ -153,7 +155,7 @@ class AndinoFleetManager(Node):
        # check if robot is online
        if self._check_robot_online(req.robot_name) is False:
            resp.current_position = [0.0 ,0.0 ,0.0]
-           resp.max_lin_velocity = 0.0
+           resp.max_lin_velocity = 0.001
            resp.distance_remaining = 0.0
            resp.is_robot_connected = False
            resp.is_navigation_completed = False
@@ -171,6 +173,39 @@ class AndinoFleetManager(Node):
             resp.distance_remaining = self._distance_remainings[req.robot_name]
             resp.is_robot_connected = True
             resp.is_navigation_completed = self._navigation_results[req.robot_name]
+       return resp
+   
+   # callback process for publishing init pose
+   def _init_pose_callback(self, req: SrvTypeRequest, resp: SrvTypeResponse):
+       # publish init_pose topic to all robots
+       robots = req.robot_names
+       # define publisher
+       for robot in robots:
+           topic = '/'+robot+'/initialpose'
+           self._initialpose_pubs[robot] = self.create_publisher(PoseWithCovarianceStamped, topic, 10)
+           msg = PoseWithCovarianceStamped()
+           msg.header.frame_id = 'map'
+           
+           match robot:
+               case 'andino1':
+                   msg.pose.pose.position.x = -2.1
+                   msg.pose.pose.position.y = 4.7
+               case 'andino2':
+                   msg.pose.pose.position.x = 1.7
+                   msg.pose.pose.position.y = 4.7
+               case 'andino3':
+                   msg.pose.pose.position.x = -2.1
+                   msg.pose.pose.position.y = 1.4
+               case 'andino4':
+                   msg.pose.pose.position.x = 1.5
+                   msg.pose.pose.position.y = 1.8    
+               case _:
+                   msg.pose.pose.position.x = 0.0
+                   msg.pose.pose.position.y = 0.0
+           
+           self._initialpose_pubs[robot].publish(msg)
+       self.get_logger().info('Initial poses are set!')
+       resp.result = True
        return resp
        
    # Check if the controlelr server available given a robot name
