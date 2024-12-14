@@ -19,7 +19,7 @@ In order for a controller to function properly, the following functionalities ar
 Users can choose whether to use the custom controller (as above section), or Nav2 controller server integration for general perposes. Thanks to [andino_gz](https://github.com/Ekumen-OS/andino_gz/tree/humble?tab=readme-ov-file#compass-navigation) package, Nav2 controller is integrated and is ready to be used. The package facilitates users by having a flag that enables Nav2 features. This package intends to be a wrapper to launch Nav2-enabled controller(s).
 
 ### Implementation
-Include a diagram showing ROS action Nav2
+<img src="../resources/nav2_controller_diagram.png" alt="nav2 diagram" title="nav2 diagram" width="650">
 
 ## Fleet Manager
 ### Summary
